@@ -23,6 +23,8 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  GlobalKey<FormState> _globalKey = GlobalKey<FormState>();
+
   TextEditingController variableXController = TextEditingController();
   TextEditingController variableYController = TextEditingController();
   TextEditingController variableZController = TextEditingController();
@@ -31,6 +33,21 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    bool _isNumeric(String s) {
+      if (s == null) {
+        return false;
+      }
+      return double.tryParse(s) != null;
+    }
+
+    String _validateField(value) {
+      if (value.isEmpty) {
+        return "Field with value empty!";
+      } else if (!_isNumeric(value)) {
+        return "Not a number!";
+      }
+    }
+
     final textInfo = new Container(
       width: 500,
       margin: const EdgeInsets.all(15.0),
@@ -79,7 +96,7 @@ class _HomeState extends State<Home> {
       ),
     );
 
-    final textFieldX = TextField(
+    final textFieldX = TextFormField(
       keyboardType: TextInputType.number,
       autofocus: false,
       decoration: InputDecoration(
@@ -89,6 +106,10 @@ class _HomeState extends State<Home> {
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
       ),
       controller: variableXController,
+      validator: (value) {
+        print(value);
+        return _validateField(value);
+      },
     );
 
     final textFieldY = TextFormField(
@@ -101,6 +122,10 @@ class _HomeState extends State<Home> {
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
       ),
       controller: variableYController,
+      validator: (value) {
+        print(value);
+        return _validateField(value);
+      },
     );
 
     final textFieldZ = TextFormField(
@@ -113,6 +138,10 @@ class _HomeState extends State<Home> {
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
       ),
       controller: variableZController,
+      validator: (value) {
+        print(value);
+        return _validateField(value);
+      },
     );
 
     final iconBetweenWidgets = const Icon(Icons.settings_ethernet);
@@ -128,10 +157,11 @@ class _HomeState extends State<Home> {
 
     void _resetFields() {
       setState(() {
-        variableXController.text = " ";
-        variableYController.text = " ";
-        variableZController.text = " ";
+        variableXController.text = "";
+        variableYController.text = "";
+        variableZController.text = "";
         _responseCalculate = "X";
+        _globalKey = GlobalKey<FormState>();
       });
     }
 
@@ -147,49 +177,52 @@ class _HomeState extends State<Home> {
         ],
       ),
       body: Center(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.fromLTRB(32.0, 32.0, 32.0, 100.0),
-              child: Icon(
-                Icons.swap_horizontal_circle,
-                size: 100.0,
-                color: Colors.orange,
+        child: Form(
+          key: _globalKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.fromLTRB(32.0, 32.0, 32.0, 100.0),
+                child: Icon(
+                  Icons.swap_horizontal_circle,
+                  size: 100.0,
+                  color: Colors.orange,
+                ),
               ),
-            ),
-            textInfo,
-            Container(
-              padding: EdgeInsets.fromLTRB(15, 0, 15, 0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Flexible(flex: 4, child: textFieldX),
-                  Flexible(
-                    flex: 2,
-                    child: iconBetweenWidgets,
-                  ),
-                  Flexible(flex: 4, child: textFieldY),
-                ],
-              ),
-            ),
-            Container(
-              padding: EdgeInsets.fromLTRB(15, 0, 15, 0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Flexible(flex: 4, child: textFieldZ),
-                  Flexible(flex: 2, child: iconBetweenWidgets),
-                  Flexible(
-                    flex: 4,
-                    child: Center(
-                      child: textX,
+              textInfo,
+              Container(
+                padding: EdgeInsets.fromLTRB(15, 0, 15, 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(flex: 4, child: textFieldX),
+                    Flexible(
+                      flex: 2,
+                      child: iconBetweenWidgets,
                     ),
-                  ),
-                ],
+                    Flexible(flex: 4, child: textFieldY),
+                  ],
+                ),
               ),
-            ),
-          ],
+              Container(
+                padding: EdgeInsets.fromLTRB(15, 0, 15, 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(flex: 4, child: textFieldZ),
+                    Flexible(flex: 2, child: iconBetweenWidgets),
+                    Flexible(
+                      flex: 4,
+                      child: Center(
+                        child: textX,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -201,11 +234,12 @@ class _HomeState extends State<Home> {
             color: Colors.black45,
           ),
         ),
-        onPressed: () => setState(() => _responseCalculate = _calculateRule(
-                variableXController.text,
-                variableYController.text,
-                variableZController.text)
-            .toString()),
+        onPressed: () => setState(() {
+          if (_globalKey.currentState.validate())
+            _responseCalculate = _calculateRule(variableXController.text,
+                    variableYController.text, variableZController.text)
+                .toString();
+        }),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );

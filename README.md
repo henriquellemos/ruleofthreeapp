@@ -1,6 +1,6 @@
 # ruleofthree
 
-App to calculate rule of three basics.
+App to calculate rule of three basic.
 
 ## Getting Started
 
